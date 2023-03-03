@@ -548,10 +548,15 @@ followed by a newline.
 
 */
 
+#ifdef __EMSCRIPTEN__
+// EMSCRIPTEN doesn't actually have psignal
+#undef HAVE_PSIGNAL
+#endif
+
 #ifndef HAVE_PSIGNAL
 
 void
-psignal (int signo, char *message)
+psignal (int signo, const char *message)
 {
   if (signal_names == NULL)
     {
