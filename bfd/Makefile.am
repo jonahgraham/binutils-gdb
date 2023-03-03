@@ -23,7 +23,7 @@ ACLOCAL_AMFLAGS = -I . -I .. -I ../config
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 
-SUBDIRS = doc po
+SUBDIRS = po
 
 bfddocdir = doc
 
