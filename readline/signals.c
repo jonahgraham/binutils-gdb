@@ -66,6 +66,12 @@
    to say SigHandler *foo = signal (SIGKILL, SIG_IGN); */
 typedef RETSIGTYPE SigHandler ();
 
+
+#ifdef __EMSCRIPTEN__
+// HAVE_POSIX_SIGNALS isn't being properly detected
+#define HAVE_POSIX_SIGNALS
+#endif
+
 #if defined (HAVE_POSIX_SIGNALS)
 typedef struct sigaction sighandler_cxt;
 #  define rl_sigaction(s, nh, oh)	sigaction(s, nh, oh)
