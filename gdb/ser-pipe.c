@@ -63,7 +63,6 @@ pipe_open (struct serial *scb, const char *name)
   int err_pdes[2];
   int pid;
 
-  printf("In pip_open\n");
   if (gdb_socketpair_cloexec (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
   if (gdb_socketpair_cloexec (AF_UNIX, SOCK_STREAM, 0, err_pdes) < 0)
