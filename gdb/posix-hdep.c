@@ -28,6 +28,7 @@ int
 gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	    struct timeval *timeout)
 {
+  printf("Selecting num=%d, readfds %p writefds %p exceptfds %p timeout %d.%d \n", n, readfds, writefds, exceptfds, (int)timeout->tv_sec, (int)timeout->tv_usec);
   return select (n, readfds, writefds, exceptfds, timeout);
 }
 

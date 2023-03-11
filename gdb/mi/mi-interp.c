@@ -324,6 +324,7 @@ mi_on_sync_execution_done (void)
 static void
 mi_execute_command_input_handler (char *cmd)
 {
+  printf("Entering mi_execute_command_input_handler cmd=%s\n", cmd);
   mi_execute_command_wrapper (cmd);
 
   /* Print a prompt, indicating we're ready for further input, unless

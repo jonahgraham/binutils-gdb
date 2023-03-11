@@ -415,6 +415,7 @@ top_level_prompt (void)
 void
 stdin_event_handler (int error, gdb_client_data client_data)
 {
+  printf("stdin_event_handler entry error=%d\n", error);
   if (error)
     {
       printf_unfiltered (_("error detected on stdin\n"));
@@ -514,6 +515,8 @@ command_line_handler (char *rl)
   char *p1;
   char *nline;
   int repeat = (instream == stdin);
+
+  printf("command_line_handler entry\n");
 
   if (annotation_level > 1 && instream == stdin)
     {
@@ -713,6 +716,8 @@ gdb_readline2 (gdb_client_data client_data)
   int result_size = 80;
   static int done_once = 0;
 
+  printf("entering gdb_readline2\n");
+
   /* Unbuffer the input stream, so that, later on, the calls to fgetc
      fetch only one char at the time from the stream.  The fgetc's will
      get up to the first newline, but there may be more chars in the
@@ -733,12 +738,14 @@ gdb_readline2 (gdb_client_data client_data)
      which sends the characters all at once.  Poll will notice that the
      input fd has changed state only after enter is pressed.  At this
      point we still need to fetch all the chars entered.  */
+  printf("gdb_readline2 while loop\n");
 
   while (1)
     {
       /* Read from stdin if we are executing a user defined command.
          This is the right thing for prompt_for_continue, at least.  */
       c = fgetc (instream ? instream : stdin);
+//      printf("got c=%d c=%c\n", c, c);
 
       if (c == EOF)
 	{
@@ -748,7 +755,9 @@ gdb_readline2 (gdb_client_data client_data)
 	       and we'll return NULL then.  */
 	    break;
 	  xfree (result);
+	  printf("gdb_readline2 input_handler about to be called input_handler=%p command_line_handler=%p\n",input_handler, command_line_handler);
 	  (*input_handler) (0);
+	  printf("exiting gdb_readline2 H1\n");
 	  return;
 	}
 
@@ -768,7 +777,9 @@ gdb_readline2 (gdb_client_data client_data)
     }
 
   result[input_index++] = '\0';
+  printf("got result=%s\n", result);
   (*input_handler) (result);
+  printf("exiting gdb_readline2 H2\n");
 }
 
 
@@ -1039,10 +1050,12 @@ gdb_setup_readline (void)
   gdb_stdtarg = gdb_stderr; /* for moment */
   gdb_stdtargerr = gdb_stderr; /* for moment */
 
+  printf("setting up readline\n");
   /* If the input stream is connected to a terminal, turn on
      editing.  */
   if (ISATTY (instream))
     {
+      printf("  ISATTY\n");
       /* Tell gdb that we will be using the readline library.  This
 	 could be overwritten by a command in .gdbinit like 'set
 	 editing on' or 'off'.  */
@@ -1054,6 +1067,7 @@ gdb_setup_readline (void)
     }
   else
     {
+      printf("  ! ISATTY\n");
       async_command_editing_p = 0;
       call_readline = gdb_readline2;
     }
@@ -1077,6 +1091,7 @@ gdb_setup_readline (void)
      target program (inferior), but that must be registered only when
      it actually exists (I.e. after we say 'run' or after we connect
      to a remote target.  */
+  printf("about to call add_file_handler for stdin_event_handler\n");
   add_file_handler (input_fd, stdin_event_handler, 0);
 }
 

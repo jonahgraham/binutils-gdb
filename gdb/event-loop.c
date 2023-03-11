@@ -22,6 +22,10 @@
 #include "event-top.h"
 #include "queue.h"
 
+//#ifdef __EMSCRIPTEN__
+//#include <emscripten.h>
+//#endif
+
 #ifdef HAVE_POLL
 #if defined (HAVE_POLL_H)
 #include <poll.h>
@@ -273,7 +277,7 @@ gdb_do_one_event (void)
   static int event_source_head = 0;
   const int number_of_sources = 3;
   int current = 0;
-
+  printf ("gdb_do_one_event\n");
   /* First let's see if there are any asynchronous signal handlers
      that are ready.  These would be the result of invoking any of the
      signal handlers.  */
@@ -286,6 +290,7 @@ gdb_do_one_event (void)
     {
       int res;
 
+      printf ("gdb_do_one_event current %d event_source_head %d\n", current, event_source_head);
       switch (event_source_head)
 	{
 	case 0:
@@ -311,8 +316,10 @@ gdb_do_one_event (void)
       if (event_source_head == number_of_sources)
 	event_source_head = 0;
 
-      if (res > 0)
+      if (res > 0) {
+	printf ("gdb_do_one_event return 1 res > 0 res=%d\n", res);
 	return 1;
+      }
     }
 
   /* Block waiting for a new event.  If gdb_wait_for_event returns -1,
@@ -320,11 +327,15 @@ gdb_do_one_event (void)
      sources left.  This will make the event loop stop, and the
      application exit.  */
 
-  if (gdb_wait_for_event (1) < 0)
+  printf ("gdb_do_one_event gdb_wait_for_event\n");
+  if (gdb_wait_for_event (1) < 0) {
+    printf ("gdb_do_one_event gdb_wait_for_event return -1\n");
     return -1;
+  }
 
   /* If gdb_wait_for_event has returned 1, it means that one event has
      been handled.  We break out of the loop.  */
+  printf ("gdb_do_one_event return 1 at end\n");
   return 1;
 }
 
@@ -341,13 +352,18 @@ start_event_loop (void)
   while (1)
     {
       int result = 0;
-
+//#ifdef __EMSCRIPTEN__
+//      emscripten_sleep(0);
+//#endif
+      printf("In start_event_loop loop\n");
       TRY
 	{
 	  result = gdb_do_one_event ();
+	  printf("start_event_loop result=%d\n", result);
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{
+	  printf("start_event_loop exception\n");
 	  exception_print (gdb_stderr, ex);
 
 	  /* If any exception escaped to here, we better enable
@@ -411,6 +427,7 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
   if (use_poll)
     {
 #ifdef HAVE_POLL
+      printf("ABout to call create_file_handler A\n");
       create_file_handler (fd, POLLIN, proc, client_data);
 #else
       internal_error (__FILE__, __LINE__,
@@ -418,8 +435,10 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
 #endif
     }
   else
-    create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION, 
-			 proc, client_data);
+    {
+      printf("ABout to call create_file_handler B\n");
+      create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION, proc, client_data);
+    }
 }
 
 /* Add a file handler/descriptor to the list of descriptors we are
@@ -441,7 +460,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
 		     gdb_client_data client_data)
 {
   file_handler *file_ptr;
-
+  printf("create_file_handler\n");
   /* Do we already have a file handler for this file?  (We may be
      changing its associated procedure).  */
   for (file_ptr = gdb_notifier.first_file_handler; file_ptr != NULL;
@@ -650,6 +669,7 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 #ifdef HAVE_POLL
   int error_mask;
 #endif
+  printf("handle_file_event entry\n");
 
     {
 	{
@@ -662,6 +682,7 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 
 	  /* See if the desired events (mask) match the received
 	     events (ready_mask).  */
+	  printf("handle_file_event H1\n");
 
 	  if (use_poll)
 	    {
@@ -670,9 +691,11 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 		 signal more data to read.  */
 	      error_mask = POLLHUP | POLLERR | POLLNVAL;
 	      mask = ready_mask & (file_ptr->mask | error_mask);
+	      printf("handle_file_event H2\n");
 
 	      if ((mask & (POLLERR | POLLNVAL)) != 0)
 		{
+		  printf("handle_file_event H3\n");
 		  /* Work in progress.  We may need to tell somebody
 		     what kind of error we had.  */
 		  if (mask & POLLERR)
@@ -684,7 +707,10 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 		  file_ptr->error = 1;
 		}
 	      else
-		file_ptr->error = 0;
+		{
+		  printf ("handle_file_event H4\n");
+		  file_ptr->error = 0;
+		}
 #else
 	      internal_error (__FILE__, __LINE__,
 			      _("use_poll without HAVE_POLL"));
@@ -692,6 +718,7 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 	    }
 	  else
 	    {
+	      printf ("handle_file_event H5\n");
 	      if (ready_mask & GDB_EXCEPTION)
 		{
 		  printf_unfiltered (_("Exception condition detected "
@@ -702,12 +729,15 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 		file_ptr->error = 0;
 	      mask = ready_mask & file_ptr->mask;
 	    }
+	  printf ("handle_file_event H6\n");
 
 	  /* If there was a match, then call the handler.  */
 	  if (mask != 0)
 	    (*file_ptr->proc) (file_ptr->error, file_ptr->client_data);
 	}
     }
+    printf("exiting handle_file_event\n");
+
 }
 
 /* Wait for new events on the monitored file descriptors.  Run the
@@ -722,7 +752,7 @@ gdb_wait_for_event (int block)
 {
   file_handler *file_ptr;
   int num_found = 0;
-
+  printf("gdb_wait_for_event block=%d\n", block);
   /* Make sure all output is done before getting another event.  */
   gdb_flush (gdb_stdout);
   gdb_flush (gdb_stderr);
@@ -743,8 +773,10 @@ gdb_wait_for_event (int block)
       else
 	timeout = 0;
 
+      printf("gdb_wait_for_event about to call poll\n");
       num_found = poll (gdb_notifier.poll_fds,
 			(unsigned long) gdb_notifier.num_fds, timeout);
+      printf("gdb_wait_for_event poll num_found=%d\n", num_found);
 
       /* Don't print anything if we get out of poll because of a
 	 signal.  */
@@ -810,6 +842,7 @@ gdb_wait_for_event (int block)
       int i;
       int mask;
 
+      printf("gdb_wait_for_event looking for next_poll_fds_index\n");
       while (1)
 	{
 	  if (gdb_notifier.next_poll_fds_index >= gdb_notifier.num_fds)
@@ -820,6 +853,7 @@ gdb_wait_for_event (int block)
 	  if ((gdb_notifier.poll_fds + i)->revents)
 	    break;
 	}
+      printf("gdb_wait_for_event done looking for next_poll_fds_index\n");
 
       for (file_ptr = gdb_notifier.first_file_handler;
 	   file_ptr != NULL;
@@ -831,6 +865,7 @@ gdb_wait_for_event (int block)
       gdb_assert (file_ptr != NULL);
 
       mask = (gdb_notifier.poll_fds + i)->revents;
+      printf("gdb_wait_for_event about to call handle_file_event\n");
       handle_file_event (file_ptr, mask);
       return 1;
 #else
