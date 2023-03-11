@@ -1053,7 +1053,7 @@ gdb_setup_readline (void)
   printf("setting up readline\n");
   /* If the input stream is connected to a terminal, turn on
      editing.  */
-  if (ISATTY (instream))
+  if (0 && ISATTY (instream))
     {
       printf("  ISATTY\n");
       /* Tell gdb that we will be using the readline library.  This
