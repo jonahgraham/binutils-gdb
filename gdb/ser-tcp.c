@@ -134,7 +134,7 @@ wait_for_connect (struct serial *scb, unsigned int *polls)
 	 the serial structure has not yet been initialized - the
 	 MinGW select wrapper will not know that this FD refers
 	 to a socket.  */
-      n = select (scb->fd + 1, &rset, &wset, &eset, &t);
+      n = select (scb->fd + 1, &rset, &wset, NULL, &t);
     }
   else
     /* Use gdb_select here, since we have no file descriptors, and on
@@ -411,9 +411,9 @@ static const struct serial_ops tcp_ops =
 void
 _initialize_ser_tcp (void)
 {
-#ifdef USE_WIN32API
+#if defined(USE_WIN32API) || defined(__EMSCRIPTEN__)
   /* Do nothing; the TCP serial operations will be initialized in
-     ser-mingw.c.  */
+     ser-mingw.c and ser-emscripten.c.  */
 #else
   serial_add_interface (&tcp_ops);
 #endif /* USE_WIN32API */

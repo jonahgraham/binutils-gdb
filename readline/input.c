@@ -177,6 +177,7 @@ rl_gather_tyi ()
 
   chars_avail = 0;
   tty = fileno (rl_instream);
+  printf("HERE H4\n");
 
 #if defined (HAVE_SELECT)
   FD_ZERO (&readfds);
@@ -184,7 +185,7 @@ rl_gather_tyi ()
   FD_SET (tty, &readfds);
   FD_SET (tty, &exceptfds);
   USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
-  result = select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+  result = select (tty + 1, &readfds, (fd_set *)NULL, NULL, &timeout);
   if (result <= 0)
     return 0;	/* Nothing to read. */
 #endif
@@ -300,7 +301,8 @@ _rl_input_available ()
   FD_SET (tty, &exceptfds);
   timeout.tv_sec = 0;
   timeout.tv_usec = _keyboard_input_timeout;
-  return (select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout) > 0);
+  printf("HERE H5\n");
+  return (select (tty + 1, &readfds, (fd_set *)NULL, NULL, &timeout) > 0);
 #else
 
 #if defined (FIONREAD)

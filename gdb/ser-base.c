@@ -247,7 +247,7 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 {
   if (scb->error_fd != -1)
     {
-      ssize_t s;
+      ssize_t s; // @suppress("Type cannot be resolved")
       char buf[GDB_MI_MSG_WIDTH + 1];
 
       for (;;)

@@ -475,10 +475,11 @@ wait_for_event (void)
   gdb_notifier.ready_masks[0] = gdb_notifier.check_masks[0];
   gdb_notifier.ready_masks[1] = gdb_notifier.check_masks[1];
   gdb_notifier.ready_masks[2] = gdb_notifier.check_masks[2];
+  printf("HERE H2\n");
   num_found = select (gdb_notifier.num_fds,
 		      &gdb_notifier.ready_masks[0],
 		      &gdb_notifier.ready_masks[1],
-		      &gdb_notifier.ready_masks[2],
+		      NULL,
 		      NULL);
 
   /* Clear the masks after an error from select.  */

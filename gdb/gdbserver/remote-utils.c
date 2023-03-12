@@ -741,6 +741,7 @@ input_interrupt (int unused)
 
   FD_ZERO (&readset);
   FD_SET (remote_desc, &readset);
+  printf("HERE H3\n");
   if (select (remote_desc + 1, &readset, 0, 0, &immediate) > 0)
     {
       int cc;

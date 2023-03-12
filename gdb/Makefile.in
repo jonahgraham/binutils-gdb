@@ -1734,7 +1734,7 @@ ALLDEPFILES = \
 	rx-tdep.c \
 	s390-linux-tdep.c s390-linux-nat.c \
 	score-tdep.c \
-	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
+	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c ser-emscripten.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
 	solib-svr4.c \

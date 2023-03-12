@@ -14436,7 +14436,7 @@ fi
 $as_echo "$gdb_cv_os_cygwin" >&6; }
 
 
-SER_HARDWIRE="ser-base.o ser-unix.o ser-pipe.o ser-tcp.o"
+SER_HARDWIRE="ser-base.o ser-unix.o ser-pipe.o ser-tcp.o ser-emscripten.o"
 case ${host} in
   *go32* ) SER_HARDWIRE=ser-go32.o ;;
   *djgpp* ) SER_HARDWIRE=ser-go32.o ;;

@@ -188,7 +188,10 @@ serial_open (const char *name)
   const struct serial_ops *ops;
   const char *open_name = name;
 
-  if (strcmp (name, "pc") == 0)
+  printf("serial_open %s\n", name);
+  if (startswith (name, "ws"))
+    ops = serial_interface_lookup ("ws");
+  else if (strcmp (name, "pc") == 0)
     ops = serial_interface_lookup ("pc");
   else if (startswith (name, "lpt"))
     ops = serial_interface_lookup ("parallel");
